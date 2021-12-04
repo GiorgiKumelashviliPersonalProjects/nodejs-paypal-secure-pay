@@ -25,10 +25,14 @@ const paypalClient = new paypal.core.PayPalHttpClient(
 	new Enviroment(configs.paypalClientID, configs.paypalSecretID)
 );
 
-const Packets = new Map([
-	[1, { price: 10, name: 'standart' }],
-	[2, { price: 100, name: 'premium' }],
-]);
+// const Packets = new Map([
+// 	[1, { price: 10, name: 'standart' }],
+// 	[2, { price: 100, name: 'premium' }],
+// ]);
+const Packets = {
+	1: { price: 10, name: 'standart' },
+	2: { price: 100, name: 'premium' },
+};
 
 app.get('/', (req, res) => {
 	res.render('index', {
@@ -38,17 +42,13 @@ app.get('/', (req, res) => {
 
 app.post('/create-order', async (req, res) => {
 	const request = new paypal.orders.OrdersCreateRequest();
-	const items = req.body?.items;
 
-	if (!items) {
+	if (!req.body?.id || !Packets[req.body?.id]) {
 		return null;
 	}
-
-	const total = items.reduce((sum, item) => {
-		return sum + Packets.get(item.id).price;
-	}, 0);
-
-	// request.headers['prefer'] = 'return=representation';
+	const itemID = req.body?.id;
+	const item = Packets[itemID];
+	const total = item.price;
 	request.prefer('return=representation');
 
 	request.requestBody({
@@ -65,19 +65,6 @@ app.post('/create-order', async (req, res) => {
 						},
 					},
 				},
-				items: items.map(item => {
-					const packet = Packets.get(item.id);
-
-					// item detail(s)
-					return {
-						name: packet.name,
-						unit_amount: {
-							currency_code: 'USD',
-							value: packet.price,
-						},
-						quantity: 1,
-					};
-				}),
 			},
 		],
 	});

@@ -10,11 +10,12 @@ paypal
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					items: [
-						{
-							id: 1,
-						},
-					],
+					id: 1,
+					// items: [
+					// 	{
+					// 		id: 1,
+					// 	},
+					// ],
 				}),
 			})
 				.then(res => {
